@@ -1,18 +1,36 @@
 import { Resend } from "resend";
 
-export const runtime = "nodejs"; // run on Node (not Edge)
+export const runtime = "nodejs";          // use Node runtime
+export const dynamic = "force-dynamic";   // don't try to pre-render
+export const revalidate = 0;              // no caching
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+let resend: Resend | null = null;
 
 export async function POST(req: Request) {
-  try {
-    const { items, customer } = await req.json();
-    const total = (items || []).reduce((s: number, i: any) => s + (i.price || 0), 0);
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    // Fail gracefully at runtime instead of crashing the build
+    return Response.json(
+      { ok: false, error: "Missing RESEND_API_KEY environment variable" },
+      { status: 500 }
+    );
+  }
 
-    const list = (items || [])
+  // Lazy init (only once per server instance)
+  if (!resend) resend = new Resend(key);
+
+  try {
+    const { items = [], customer = {} } = await req.json();
+
+    const total = items.reduce(
+      (sum: number, i: any) => sum + (Number(i?.price) || 0),
+      0
+    );
+
+    const listHtml = items
       .map(
         (i: any) =>
-          `<li>${i.name} – ${i.chosenSize || ""} – $${i.price?.toFixed?.(2) ?? i.price}</li>`
+          `<li>${i.name ?? ""} – ${i.chosenSize ?? ""} – $${Number(i.price).toFixed(2)}</li>`
       )
       .join("");
 
@@ -24,27 +42,22 @@ export async function POST(req: Request) {
         <p><strong>Pickup/Delivery:</strong> ${customer?.delivery || "-"}</p>
         <p><strong>Date needed:</strong> ${customer?.date || "-"}</p>
         <h3>Items</h3>
-        <ul>${list}</ul>
+        <ul>${listHtml}</ul>
         <p><strong>Total:</strong> $${total.toFixed(2)}</p>
         <h3>Notes</h3>
         <p>${(customer?.notes || "").replace(/\n/g, "<br/>")}</p>
       </div>
     `;
 
-    // For first tests, use the Resend testing sender below.
-    // After you verify your domain in Resend, change both `from` and `to` to your addresses.
     const { data, error } = await resend.emails.send({
-      from: "The Sweeterie <onboarding@resend.dev>",
-      to: ["kaushchand@gmailcom"], // TODO: change to your real inbox
+      from: "The Sweeterie <onboarding@resend.dev>", // change after verifying your domain in Resend
+      to: ["orders@thesweeterie.com.au"],            // update to your real inbox
       subject: `New order – ${customer?.name || "Customer"}`,
       html,
-      // Optional: make replies go to your customer automatically
-      // reply_to: customer?.email,
+      // reply_to: customer?.email, // optional
     });
 
-    if (error) {
-      return Response.json({ ok: false, error }, { status: 500 });
-    }
+    if (error) return Response.json({ ok: false, error }, { status: 500 });
     return Response.json({ ok: true, id: data?.id });
   } catch (e: any) {
     return Response.json({ ok: false, error: String(e) }, { status: 400 });
