@@ -1,20 +1,35 @@
-
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
 
-const OWNER_EMAIL = "kaushchand@gmail.com"; // TODO: change to your real email
+// =============================
+// The Sweeterie – One-file React site
+// Pages: Shop, Previous Cakes, Services, Feedback, Contact
+// Features: search, filter, sort, cart, checkout → sends email via /api/order
+// =============================
 
-const CAKES = [
+const OWNER_EMAIL = "orders@thesweeterie.com.au"; // Shown on Contact page only
+
+type Cake = {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  sizes: string[];
+  tags: string[];
+  image: string;
+};
+
+const CAKES: Cake[] = [
   {
     id: "classic-vanilla",
     name: "Classic Vanilla",
     description:
       "Moist vanilla sponge with vanilla bean buttercream. Simple, elegant, and a crowd favourite.",
     price: 55,
-    sizes: ["6\" (6–8 serves)", "8\" (10–12 serves)", "10\" (16–20 serves)"],
+    sizes: ['6" (6–8 serves)', '8" (10–12 serves)', '10" (16–20 serves)'],
     tags: ["vanilla", "popular", "birthday"],
     image:
-      "./photos/image1.jpg",
+      "https://images.unsplash.com/photo-1606313564200-e75d5e30476d?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: "choc-ganache",
@@ -22,7 +37,7 @@ const CAKES = [
     description:
       "Rich cocoa layers coated in silky dark chocolate ganache. Decadent and not too sweet.",
     price: 68,
-    sizes: ["6\"", "8\"", "10\""],
+    sizes: ['6"', '8"', '10"'],
     tags: ["chocolate", "rich", "anniversary"],
     image:
       "https://images.unsplash.com/photo-1551024709-8f23befc6cf7?q=80&w=1200&auto=format&fit=crop",
@@ -33,7 +48,7 @@ const CAKES = [
     description:
       "Velvety crumb with hint of cocoa, layered with cream cheese frosting.",
     price: 72,
-    sizes: ["6\"", "8\""],
+    sizes: ['6"', '8"'],
     tags: ["cream-cheese", "wedding", "popular"],
     image:
       "https://images.unsplash.com/photo-1599785209796-9e7f9aee0f54?q=80&w=1200&auto=format&fit=crop",
@@ -44,18 +59,18 @@ const CAKES = [
     description:
       "Citrus sponge soaked in lemon syrup with light Swiss meringue buttercream.",
     price: 62,
-    sizes: ["6\"", "8\"", "sheet"],
+    sizes: ['6"', '8"', "sheet"],
     tags: ["lemon", "fresh", "spring"],
     image:
       "https://images.unsplash.com/photo-1614707267537-3e77f66cba4c?q=80&w=1200&auto=format&fit=crop",
   },
   {
     id: "gluten-free-almond",
-    name: "Gluten‑Free Almond",
+    name: "Gluten-Free Almond",
     description:
-      "Flourless almond cake with orange blossom—naturally gluten‑free.",
+      "Flourless almond cake with orange blossom—naturally gluten-free.",
     price: 76,
-    sizes: ["6\"", "8\""],
+    sizes: ['6"', '8"'],
     tags: ["gluten-free", "almond"],
     image:
       "https://images.unsplash.com/photo-1541976076758-347942db1970?q=80&w=1200&auto=format&fit=crop",
@@ -66,7 +81,7 @@ const CAKES = [
     description:
       "Vanilla layers, whipped cream, and fresh macerated strawberries.",
     price: 70,
-    sizes: ["6\"", "8\"", "10\""],
+    sizes: ['6"', '8"', '10"'],
     tags: ["fruity", "summer", "popular"],
     image:
       "https://images.unsplash.com/photo-1541789094913-f3809a8a0a03?q=80&w=1200&auto=format&fit=crop",
@@ -82,7 +97,7 @@ const GALLERY = [
   },
   {
     id: "gal-2",
-    title: "Semi‑naked rustic wedding",
+    title: "Semi-naked rustic wedding",
     image:
       "https://images.unsplash.com/photo-1523365280197-f1783db9fe62?q=80&w=1200&auto=format&fit=crop",
   },
@@ -246,7 +261,7 @@ function Shop({ addToCart }: { addToCart: (item: any) => void }) {
   return (
     <Section
       title="Shop cakes"
-      description="Browse our handmade cakes. Choose a size and add to basket—checkout sends us your order details via email."
+      description="Browse our handmade cakes. Choose a size and add to basket—checkout sends us your order details."
       actions={
         <div className="flex flex-wrap gap-2 items-center">
           <input
@@ -288,11 +303,11 @@ function Shop({ addToCart }: { addToCart: (item: any) => void }) {
             <div className="p-4 flex flex-col gap-3">
               <div className="flex items-start justify-between gap-4">
                 <h3 className="text-lg font-semibold leading-tight">{c.name}</h3>
-                <span className="font-semibold">${"{"+ "c.price" +"}"}</span>
+                <span className="font-semibold">${c.price}</span>
               </div>
               <p className="text-sm text-muted-foreground">{c.description}</p>
               <div className="flex flex-wrap gap-2">
-                {c.tags.map((t: string) => (
+                {c.tags.map((t) => (
                   <span key={t} className="text-xs bg-gray-100 rounded-full px-2 py-1">
                     {t}
                   </span>
@@ -355,7 +370,7 @@ function Cart({
                 <p className="font-medium">
                   {i.name} <span className="text-muted-foreground">· {i.chosenSize}</span>
                 </p>
-                <p className="text-sm">${"{"+ "i.price" +"}"}</p>
+                <p className="text-sm">${i.price}</p>
               </div>
               <button className="text-sm underline" onClick={() => remove(i)}>
                 Remove
@@ -364,7 +379,7 @@ function Cart({
           ))}
           <div className="flex items-center justify-between border-t pt-4">
             <p className="font-semibold">Total</p>
-            <p className="font-semibold">${"{"+ "total" +"}"}</p>
+            <p className="font-semibold">${total}</p>
           </div>
           <div className="flex gap-2">
             <button className="px-4 py-2 rounded-xl border" onClick={clear}>
@@ -384,10 +399,12 @@ function CheckoutModal({
   open,
   close,
   items,
+  onSuccess,
 }: {
   open: boolean;
   close: () => void;
   items: any[];
+  onSuccess?: () => void;
 }) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -396,27 +413,37 @@ function CheckoutModal({
   const [delivery, setDelivery] = useState("Pickup");
   const [notes, setNotes] = useState("");
 
+  const [loading, setLoading] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [err, setErr] = useState("");
+
   const total = items.reduce((s, i) => s + i.price, 0);
 
-  const mailto = useMemo(() => {
-    const subject = encodeURIComponent(`Cake order – ${name || "New customer"}`);
-    const lines = [
-      `Customer: ${name}`,
-      `Email: ${email}`,
-      `Phone: ${phone}`,
-      `Pickup/Delivery: ${delivery}`,
-      `Date: ${date}`,
-      "",
-      "Items:",
-      ...items.map((i) => `• ${i.name} – ${i.chosenSize} – $${i.price}`),
-      "",
-      `Total: $${total}`,
-      "",
-      `Notes: ${notes}`,
-    ];
-    const body = encodeURIComponent(lines.join("\\n"));
-    return `mailto:${OWNER_EMAIL}?subject=${subject}&body=${body}`;
-  }, [name, email, phone, delivery, date, notes, items, total]);
+  async function placeOrder() {
+    setLoading(true);
+    setErr("");
+    setSent(false);
+    try {
+      const res = await fetch("/api/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items,
+          customer: { name, email, phone, delivery, date, notes },
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok || (json && json.ok === false)) {
+        throw new Error(json?.error || `Failed to send order (status ${res.status})`);
+      }
+      setSent(true);
+      onSuccess?.();
+    } catch (e: any) {
+      setErr(e?.message || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   if (!open) return null;
 
@@ -428,7 +455,7 @@ function CheckoutModal({
           <button onClick={close} className="text-2xl leading-none">×</button>
         </div>
         <p className="text-sm text-muted-foreground mt-1">
-          Fill in your details and click <strong>Confirm & Email</strong>. Your email app will open with a pre‑filled order email.
+          Fill in your details and click <strong>Confirm Order</strong>. We’ll email you back to confirm.
         </p>
         <form className="grid gap-3 mt-4" onSubmit={(e) => e.preventDefault()}>
           <label className="grid gap-1">
@@ -460,12 +487,26 @@ function CheckoutModal({
             <span className="text-sm">Notes (dietary, message on cake, colours)</span>
             <textarea className="border rounded-xl px-3 py-2" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />
           </label>
-          <a href={mailto} className="mt-2 inline-flex items-center justify-center gap-2 bg-gray-900 text-white rounded-xl px-4 py-2">
-            Confirm & Email
-            <span aria-hidden>✉️</span>
-          </a>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={placeOrder}
+              disabled={loading}
+              className="mt-2 inline-flex items-center justify-center gap-2 bg-gray-900 text-white rounded-xl px-4 py-2 disabled:opacity-60"
+            >
+              {loading ? "Sending…" : "Confirm Order"}
+              <span aria-hidden>✉️</span>
+            </button>
+            <button type="button" onClick={close} className="mt-2 inline-flex items-center justify-center gap-2 border rounded-xl px-4 py-2">
+              Close
+            </button>
+          </div>
+
+          {sent && <p className="text-sm text-green-700">Order sent! We’ll be in touch to confirm details.</p>}
+          {err && <p className="text-sm text-red-600">Error: {err}</p>}
+
           <p className="text-xs text-muted-foreground">
-            By confirming you consent to be contacted regarding your order. We’ll reply to confirm availability and pricing (delivery quoted if selected).
+            By confirming you consent to be contacted regarding your order.
           </p>
         </form>
       </div>
@@ -500,7 +541,7 @@ function Services() {
     },
     { icon: "🍪", title: "Custom Cookies", desc: "Logo cookies, stamped messages, or themed sets." },
     { icon: "🎉", title: "Event Catering", desc: "Dessert tables, mini tarts, and more—send your brief for a quote." },
-    { icon: "🍰", title: "Dietary Options", desc: "Gluten‑free and dairy‑free on request. We use separate tools but a shared kitchen." },
+    { icon: "🍰", title: "Dietary Options", desc: "Gluten-free and dairy-free on request. We use separate tools but a shared kitchen." },
   ];
   return (
     <Section title="Other services" description="More sweet things we can help with.">
@@ -526,10 +567,13 @@ function Feedback() {
   ]);
   const [name, setName] = useState("");
   const [msg, setMsg] = useState("");
-  const [rating, setRating] = useState(5 as number | string);
+  const [rating, setRating] = useState<number | string>(5);
 
   return (
-    <Section title="Customer feedback" description="Leave a quick review—thanks for supporting a local home business!">
+    <Section
+      title="Customer feedback"
+      description="Leave a quick review—thanks for supporting a local home business!"
+    >
       <form
         className="grid sm:grid-cols-[1fr_auto_auto] gap-3 mb-6"
         onSubmit={(e) => {
@@ -544,7 +588,9 @@ function Feedback() {
         <input className="border rounded-xl px-3 py-2" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} />
         <select className="border rounded-xl px-3 py-2" value={rating} onChange={(e) => setRating(e.target.value)}>
           {[5, 4, 3, 2, 1].map((r) => (
-            <option key={r} value={r}>{r} ★</option>
+            <option key={r} value={r}>
+              {r} ★
+            </option>
           ))}
         </select>
         <button className="bg-gray-900 text-white rounded-xl px-4 py-2">Post</button>
@@ -585,7 +631,7 @@ function Contact() {
             </li>
           </ul>
           <p className="text-xs text-muted-foreground mt-3">
-            Licensed home‑based kitchen. Council compliant. ABN available on invoice.
+            Licensed home-based kitchen. Council compliant. ABN available on invoice.
           </p>
         </div>
         <div className="border rounded-2xl p-5">
@@ -647,7 +693,7 @@ export default function SweeterieSite() {
       <section className="bg-gradient-to-b from-gray-50 to-white border-b">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold leading-tight">Small‑batch cakes, made to order</h2>
+            <h2 className="text-3xl sm:text-4xl font-extrabold leading-tight">Small-batch cakes, made to order</h2>
             <p className="mt-3 text-muted-foreground">
               Custom celebration cakes, cupcakes, and dessert tables. Order online and we’ll confirm your booking by email.
             </p>
@@ -686,7 +732,19 @@ export default function SweeterieSite() {
 
       <Footer />
 
-      <CheckoutModal open={showCheckout} close={() => setShowCheckout(false)} items={cart} />
+      <CheckoutModal
+        open={showCheckout}
+        close={() => setShowCheckout(false)}
+        items={cart}
+        onSuccess={() => setCart([])} // clear basket after a successful send
+      />
     </div>
   );
 }
+
+// =============================
+// Notes
+// • This file expects an API route at /app/api/order/route.ts that sends the email via Resend (see earlier snippet).
+// • Set RESEND_API_KEY in Vercel → Project Settings → Environment Variables.
+// • If you use plain JavaScript: rename to page.jsx and adjust the API route to route.js.
+// =============================
