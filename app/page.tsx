@@ -2,7 +2,7 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
 
-const OWNER_EMAIL = "orders@example.com.au"; // TODO: change to your real email
+const OWNER_EMAIL = "kaushchand@gmail.com"; // TODO: change to your real email
 
 const CAKES = [
   {
