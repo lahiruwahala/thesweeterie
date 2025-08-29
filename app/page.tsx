@@ -14,7 +14,7 @@ const CAKES = [
     sizes: ["6\" (6–8 serves)", "8\" (10–12 serves)", "10\" (16–20 serves)"],
     tags: ["vanilla", "popular", "birthday"],
     image:
-      "https://images.unsplash.com/photo-1606313564200-e75d5e30476d?q=80&w=1200&auto=format&fit=crop",
+      "./photos/image1.jpg",
   },
   {
     id: "choc-ganache",
