@@ -1,0 +1,6 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Simple muted text helper to match the design */
+.text-muted-foreground { color: #6b7280; }
